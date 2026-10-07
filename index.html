@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTCNN Lip Tracking & Optical Flow Studio</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Header / Hero Section -->
+  <header class="hero">
+    <div class="container">
+      <div class="badge-container">
+        <span class="badge"><i class="fa-solid fa-brain"></i> MTCNN PyTorch</span>
+        <span class="badge"><i class="fa-solid fa-eye"></i> Lucas-Kanade Optical Flow</span>
+        <span class="badge"><i class="fa-solid fa-scissors"></i> 5s Video Chunking</span>
+        <span class="badge"><i class="fa-solid fa-chart-line"></i> CSV Metric Logger</span>
+      </div>
+      <h1 class="hero-title">Lips-Only Detection & Optical Flow Tracking</h1>
+      <p class="hero-subtitle">
+        High-precision facial mouth landmark detection, Shi-Tomasi feature seeding, and Lucas-Kanade optical flow tracking with automatic 5-second video archiving.
+      </p>
+      <div class="hero-buttons">
+        <a href="#video-demo" class="btn btn-primary"><i class="fa-solid fa-play"></i> Watch Video Demo</a>
+        <a href="#analytics" class="btn btn-secondary"><i class="fa-solid fa-chart-pie"></i> View Telemetry Data</a>
+        <a href="https://github.com" id="github-link-btn" target="_blank" class="btn btn-outline"><i class="fa-brands fa-github"></i> GitHub Repository</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Quick Metrics Bar -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <i class="fa-solid fa-video metric-icon"></i>
+        <div class="metric-num" id="total-frames-count">471</div>
+        <div class="metric-lbl">Total Frames Processed</div>
+      </div>
+      <div class="metric-card">
+        <i class="fa-solid fa-ruler-horizontal metric-icon"></i>
+        <div class="metric-num" id="avg-lip-width">48.2 px</div>
+        <div class="metric-lbl">Average Lip Width</div>
+      </div>
+      <div class="metric-card">
+        <i class="fa-solid fa-bullseye metric-icon"></i>
+        <div class="metric-num" id="active-points-count">25</div>
+        <div class="metric-lbl">Active Optical Flow Points</div>
+      </div>
+      <div class="metric-card">
+        <i class="fa-solid fa-box-archive metric-icon"></i>
+        <div class="metric-num">5.0 sec</div>
+        <div class="metric-lbl">Video Chunk Interval</div>
+      </div>
+    </section>
+
+    <!-- Video Showcase & Pipeline Breakdown -->
+    <section id="video-demo" class="section-block">
+      <h2 class="section-title"><i class="fa-solid fa-film"></i> Live Annotated Video Showcase</h2>
+      <div class="showcase-grid">
+        <div class="video-container">
+          <video controls autoplay loop muted poster="">
+            <source src="tracked_lips.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="pipeline-card">
+          <h3><i class="fa-solid fa-diagram-project"></i> Processing Pipeline</h3>
+          <ul class="pipeline-steps">
+            <li>
+              <div class="step-num">1</div>
+              <div>
+                <strong>MTCNN Landmark Detection</strong>
+                <p>Locates facial structures and extracts precise mouth corner landmarks (Left & Right mouth corners).</p>
+              </div>
+            </li>
+            <li>
+              <div class="step-num">2</div>
+              <div>
+                <strong>ROI & Shi-Tomasi Feature Seeding</strong>
+                <p>Computes centered lip bounding box and seeds up to 25 corner tracking points inside the lip region.</p>
+              </div>
+            </li>
+            <li>
+              <div class="step-num">3</div>
+              <div>
+                <strong>Lucas-Kanade Optical Flow</strong>
+                <p>Tracks corner points frame-to-frame between periodic MTCNN re-detection cycles for smooth tracking.</p>
+              </div>
+            </li>
+            <li>
+              <div class="step-num">4</div>
+              <div>
+                <strong>Shutil Directory Archiving</strong>
+                <p>Segments video into 5-second raw and cropped lip video chunks, auto-generating ZIP archives and CSV logs.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analytics Charts Section -->
+    <section id="analytics" class="section-block">
+      <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Real-Time Telemetry & Metric Visualizer</h2>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Lip Width Variation Across Frames</h3>
+          <canvas id="lipWidthChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Lip Center Motion Trajectory (X/Y Coordinates)</h3>
+          <canvas id="lipTrajectoryChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature Architecture Cards -->
+    <section class="section-block">
+      <h2 class="section-title"><i class="fa-solid fa-cubes"></i> Core Architectural Components</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
+          <h3>Hybrid Tracker Design</h3>
+          <p>Combines deep learning MTCNN face detection with lightweight Lucas-Kanade optical flow tracking for zero latency.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-folder-tree"></i></div>
+          <h3>Automated Shutil Archiving</h3>
+          <p>Automatically purges old directory structures and creates structured 5-second chunk archives on every run.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-file-csv"></i></div>
+          <h3>Comprehensive CSV Exports</h3>
+          <p>Logs frame numbers, timestamps, corner coordinates, lip widths, center coordinates, and active tracking points.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-desktop"></i></div>
+          <h3>Multi-Source Input Support</h3>
+          <p>Supports native Windows Tkinter file selector GUI, command line arguments (`--input`), or live webcam feed.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Setup & Deployment Code Snippet -->
+    <section class="section-block">
+      <h2 class="section-title"><i class="fa-solid fa-terminal"></i> Quick Start & Installation</h2>
+      <div class="code-box">
+        <pre><code># 1. Clone the repository
+git clone https://github.com/username/repository-name.git
+cd "Open cv models"
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Run Lip Tracking CLI/GUI
+python track_features.py --input sample.mp4 --show
+
+# 4. Launch Interactive Streamlit App
+streamlit run app.py</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-content">
+      <p>MTCNN Lip Tracking & Optical Flow Studio &copy; 2026. Built with OpenCV, PyTorch, Streamlit & GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
