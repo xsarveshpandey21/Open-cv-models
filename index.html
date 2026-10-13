@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MTCNN Lip Tracking & Optical Flow Studio</title>
+  <title>Facial Feature & Live Tracking Studio: Face, Ears, Eyes, Nose & Lips</title>
   <link rel="stylesheet" href="styles.css" />
   <!-- Google Fonts & Font Awesome Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,19 +18,23 @@
   <header class="hero">
     <div class="container">
       <div class="badge-container">
-        <span class="badge"><i class="fa-solid fa-brain"></i> MTCNN PyTorch</span>
-        <span class="badge"><i class="fa-solid fa-eye"></i> Lucas-Kanade Optical Flow</span>
-        <span class="badge"><i class="fa-solid fa-scissors"></i> 5s Video Chunking</span>
-        <span class="badge"><i class="fa-solid fa-chart-line"></i> CSV Metric Logger</span>
+        <span class="badge" style="border-color: #ff4d4d; color: #ff4d4d;"><i class="fa-solid fa-circle-dot"></i> Live Webcam Tracking</span>
+        <span class="badge"><i class="fa-solid fa-user"></i> Whole Face BBox</span>
+        <span class="badge" style="border-color: #ffb400; color: #ffb400;"><i class="fa-solid fa-ear-listen"></i> Left & Right Ears</span>
+        <span class="badge"><i class="fa-solid fa-eye"></i> Eyes & Pupils</span>
+        <span class="badge"><i class="fa-solid fa-arrows-left-right"></i> Eye Distance & Ear Span</span>
+        <span class="badge" style="border-color: #e040fb; color: #e040fb;"><i class="fa-solid fa-crosshairs"></i> Nose Landmark</span>
+        <span class="badge"><i class="fa-solid fa-comment-dots"></i> Lips Optical Flow</span>
+        <span class="badge"><i class="fa-solid fa-terminal"></i> Cyber HUD Telemetry</span>
       </div>
-      <h1 class="hero-title">Lips-Only Detection & Optical Flow Tracking</h1>
+      <h1 class="hero-title">Whole Face, Ears, Eyes, Nose & Lips Live Tracker</h1>
       <p class="hero-subtitle">
-        High-precision facial mouth landmark detection, Shi-Tomasi feature seeding, and Lucas-Kanade optical flow tracking with automatic 5-second video archiving.
+        End-to-end computer vision tracking system integrating MTCNN landmark detection, cranial ear geometry calculation, Shi-Tomasi feature seeding, and Lucas-Kanade optical flow for live webcam streams and video recordings.
       </p>
       <div class="hero-buttons">
-        <a href="#video-demo" class="btn btn-primary"><i class="fa-solid fa-play"></i> Watch Video Demo</a>
-        <a href="#analytics" class="btn btn-secondary"><i class="fa-solid fa-chart-pie"></i> View Telemetry Data</a>
-        <a href="https://github.com" id="github-link-btn" target="_blank" class="btn btn-outline"><i class="fa-brands fa-github"></i> GitHub Repository</a>
+        <a href="#video-demo" class="btn btn-primary"><i class="fa-solid fa-play"></i> Watch Processed Video</a>
+        <a href="#analytics" class="btn btn-secondary"><i class="fa-solid fa-chart-pie"></i> View Telemetry Charts</a>
+        <a href="http://localhost:8501" target="_blank" class="btn btn-outline"><i class="fa-solid fa-desktop"></i> Open Streamlit Studio</a>
       </div>
     </div>
   </header>
@@ -40,23 +44,23 @@
     <section class="metrics-grid">
       <div class="metric-card">
         <i class="fa-solid fa-video metric-icon"></i>
-        <div class="metric-num" id="total-frames-count">471</div>
+        <div class="metric-num" id="total-frames-count">829</div>
         <div class="metric-lbl">Total Frames Processed</div>
       </div>
       <div class="metric-card">
+        <i class="fa-solid fa-ear-listen metric-icon"></i>
+        <div class="metric-num" id="avg-ear-span">66.5 px</div>
+        <div class="metric-lbl">Average Ear Span</div>
+      </div>
+      <div class="metric-card">
+        <i class="fa-solid fa-eye metric-icon"></i>
+        <div class="metric-num" id="avg-eye-dist">26.0 px</div>
+        <div class="metric-lbl">Average Eye Distance</div>
+      </div>
+      <div class="metric-card">
         <i class="fa-solid fa-ruler-horizontal metric-icon"></i>
-        <div class="metric-num" id="avg-lip-width">48.2 px</div>
+        <div class="metric-num" id="avg-lip-width">22.0 px</div>
         <div class="metric-lbl">Average Lip Width</div>
-      </div>
-      <div class="metric-card">
-        <i class="fa-solid fa-bullseye metric-icon"></i>
-        <div class="metric-num" id="active-points-count">25</div>
-        <div class="metric-lbl">Active Optical Flow Points</div>
-      </div>
-      <div class="metric-card">
-        <i class="fa-solid fa-box-archive metric-icon"></i>
-        <div class="metric-num">5.0 sec</div>
-        <div class="metric-lbl">Video Chunk Interval</div>
       </div>
     </section>
 
@@ -66,39 +70,47 @@
       <div class="showcase-grid">
         <div class="video-container">
           <video controls autoplay loop muted poster="">
+            <source src="recorded_face_lips_eyes_tracked.mp4" type="video/mp4" />
             <source src="tracked_lips.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
         <div class="pipeline-card">
-          <h3><i class="fa-solid fa-diagram-project"></i> Processing Pipeline</h3>
+          <h3><i class="fa-solid fa-diagram-project"></i> Tracking Architecture</h3>
           <ul class="pipeline-steps">
             <li>
               <div class="step-num">1</div>
               <div>
-                <strong>MTCNN Landmark Detection</strong>
-                <p>Locates facial structures and extracts precise mouth corner landmarks (Left & Right mouth corners).</p>
+                <strong>Live Webcam / Video Input</strong>
+                <p>Real-time OpenCV capture from native webcam (index 0) or arbitrary video formats (MP4, AVI, MOV) with auto-resolution detection.</p>
               </div>
             </li>
             <li>
               <div class="step-num">2</div>
               <div>
-                <strong>ROI & Shi-Tomasi Feature Seeding</strong>
-                <p>Computes centered lip bounding box and seeds up to 25 corner tracking points inside the lip region.</p>
+                <strong>Face, Eyes & Nose Landmark Detection</strong>
+                <p>MTCNN extracts primary face bounding box <code>(x, y, w, h)</code>, left/right eye pupils, and nose tip coordinates.</p>
               </div>
             </li>
             <li>
               <div class="step-num">3</div>
               <div>
-                <strong>Lucas-Kanade Optical Flow</strong>
-                <p>Tracks corner points frame-to-frame between periodic MTCNN re-detection cycles for smooth tracking.</p>
+                <strong>Left & Right Ear Cranial Geometry</strong>
+                <p>Calculates exact ear tragus coordinates and bounding boxes from cranial lateral vectors, computing real-time ear span distance.</p>
               </div>
             </li>
             <li>
               <div class="step-num">4</div>
               <div>
-                <strong>Shutil Directory Archiving</strong>
-                <p>Segments video into 5-second raw and cropped lip video chunks, auto-generating ZIP archives and CSV logs.</p>
+                <strong>Shi-Tomasi & Lucas-Kanade Optical Flow</strong>
+                <p>Seeds corner tracking points in lip ROI and propagates motion delta vectors across all facial landmarks at 30+ FPS.</p>
+              </div>
+            </li>
+            <li>
+              <div class="step-num">5</div>
+              <div>
+                <strong>Cyber HUD Overlay & CSV Telemetry</strong>
+                <p>Renders real-time landmark coordinate badges, cyber HUD panel, and exports full spatial coordinates to structured CSV.</p>
               </div>
             </li>
           </ul>
@@ -111,11 +123,11 @@
       <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Real-Time Telemetry & Metric Visualizer</h2>
       <div class="charts-grid">
         <div class="chart-card">
-          <h3>Lip Width Variation Across Frames</h3>
+          <h3>Ear Span, Eye Distance & Lip Width (Pixels)</h3>
           <canvas id="lipWidthChart"></canvas>
         </div>
         <div class="chart-card">
-          <h3>Lip Center Motion Trajectory (X/Y Coordinates)</h3>
+          <h3>Facial Landmarks Spatial Trajectories (X vs Y)</h3>
           <canvas id="lipTrajectoryChart"></canvas>
         </div>
       </div>
@@ -123,46 +135,52 @@
 
     <!-- Feature Architecture Cards -->
     <section class="section-block">
-      <h2 class="section-title"><i class="fa-solid fa-cubes"></i> Core Architectural Components</h2>
+      <h2 class="section-title"><i class="fa-solid fa-cubes"></i> Core Feature Breakdown</h2>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
-          <h3>Hybrid Tracker Design</h3>
-          <p>Combines deep learning MTCNN face detection with lightweight Lucas-Kanade optical flow tracking for zero latency.</p>
+          <div class="feature-icon" style="color: #ff4d4d;"><i class="fa-solid fa-camera"></i></div>
+          <h3>Live Webcam Studio</h3>
+          <p>Instant camera 0 live tracking with live preview window, hotkeys (<code>ESC</code> to exit, <code>H</code> for HUD, <code>B</code> for boxes), and real-time FPS.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon"><i class="fa-solid fa-folder-tree"></i></div>
-          <h3>Automated Shutil Archiving</h3>
-          <p>Automatically purges old directory structures and creates structured 5-second chunk archives on every run.</p>
+          <div class="feature-icon" style="color: #00e5ff;"><i class="fa-solid fa-user-check"></i></div>
+          <h3>Whole Face Bounding Box</h3>
+          <p>Displays full face bounding box <code>(x, y, w, h)</code> and face center coordinates with high-tech corner accents.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon"><i class="fa-solid fa-file-csv"></i></div>
-          <h3>Comprehensive CSV Exports</h3>
-          <p>Logs frame numbers, timestamps, corner coordinates, lip widths, center coordinates, and active tracking points.</p>
+          <div class="feature-icon" style="color: #ffb400;"><i class="fa-solid fa-ear-listen"></i></div>
+          <h3>Left & Right Ear Tracking</h3>
+          <p>Calculates and tracks Left Ear & Right Ear landmarks, bounding boxes, and real-time ear span measurement (px).</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon"><i class="fa-solid fa-desktop"></i></div>
-          <h3>Multi-Source Input Support</h3>
-          <p>Supports native Windows Tkinter file selector GUI, command line arguments (`--input`), or live webcam feed.</p>
+          <div class="feature-icon" style="color: #00a3ff;"><i class="fa-solid fa-eye"></i></div>
+          <h3>Dual Eyes & Inter-Eye Distance</h3>
+          <p>Tracks Left and Right Eye centers, eye ROI bounding boxes, and dynamic inter-eye distance metric in pixels.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="color: #e040fb;"><i class="fa-solid fa-crosshairs"></i></div>
+          <h3>Nose Landmark Anchor</h3>
+          <p>Tracks nose tip keypoint and ROI box, providing the central anchor for facial geometry and orientation.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="color: #ff4081;"><i class="fa-solid fa-comment-dots"></i></div>
+          <h3>Lips & Optical Flow</h3>
+          <p>Tracks mouth corners, lip center, Shi-Tomasi feature points, motion trails, and fitted parabolic curves.</p>
         </div>
       </div>
     </section>
 
     <!-- Setup & Deployment Code Snippet -->
     <section class="section-block">
-      <h2 class="section-title"><i class="fa-solid fa-terminal"></i> Quick Start & Installation</h2>
+      <h2 class="section-title"><i class="fa-solid fa-terminal"></i> Quick Start & Live Webcam Command</h2>
       <div class="code-box">
-        <pre><code># 1. Clone the repository
-git clone https://github.com/username/repository-name.git
-cd "Open cv models"
+        <pre><code># 1. Run Live Webcam Tracking directly (Camera 0)
+python track_features.py --live
 
-# 2. Install dependencies
-pip install -r requirements.txt
+# 2. Run with Recorded Video file
+python track_features.py --input tracked_lips.mp4 --show
 
-# 3. Run Lip Tracking CLI/GUI
-python track_features.py --input sample.mp4 --show
-
-# 4. Launch Interactive Streamlit App
+# 3. Launch Interactive Streamlit Web Studio
 streamlit run app.py</code></pre>
       </div>
     </section>
@@ -170,7 +188,7 @@ streamlit run app.py</code></pre>
 
   <footer>
     <div class="container footer-content">
-      <p>MTCNN Lip Tracking & Optical Flow Studio &copy; 2026. Built with OpenCV, PyTorch, Streamlit & GitHub Pages.</p>
+      <p>Whole Face, Ears, Eyes, Nose & Lips Tracking Studio &copy; 2026. Built with OpenCV, PyTorch, MTCNN & Streamlit.</p>
     </div>
   </footer>
 

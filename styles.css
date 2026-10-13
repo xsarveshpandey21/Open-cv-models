@@ -184,15 +184,9 @@ body {
 /* Video Showcase & Pipeline Grid */
 .showcase-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: center;
-}
-
-@media (max-width: 900px) {
-  .showcase-grid {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: 1fr;
+  gap: 32px;
+  width: 100%;
 }
 
 .video-container {
@@ -200,12 +194,15 @@ body {
   border: 1px solid var(--bg-card-border);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  width: 100%;
 }
 
 .video-container video {
   width: 100%;
   height: auto;
+  max-height: 80vh;
+  object-fit: contain;
   display: block;
 }
 

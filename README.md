@@ -1,4 +1,4 @@
-# 👄 MTCNN Lip Tracking & Optical Flow Studio
+# 👤 Whole Face, Ears, Eyes, Nose & Lips Live Tracking Studio
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![OpenCV](https://img.shields.io/badge/OpenCV-4.8%2B-green.svg)](https://opencv.org/)
@@ -7,19 +7,18 @@
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Showcase-brightgreen.svg)](#-github-pages-setup)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An end-to-end Computer Vision system for **Lips-Only Detection, Feature Point Seeding, and Lucas-Kanade Optical Flow Tracking**, featuring automated 5-second video archiving using Python `shutil`, structured CSV metrics telemetry, an interactive **Streamlit Web App**, and a **GitHub Pages Live Showcase**.
-
----
-
-## 🌟 Key Features
-
-- **MTCNN Landmark Detection**: Automatically locates facial structures and extracts exact mouth corner landmarks (`left_corner`, `right_corner`).
-- **Shi-Tomasi Feature Point Seeding**: Seeds up to 25 corner tracking points inside the lip Region of Interest (ROI).
-- **Hybrid Lucas-Kanade Optical Flow**: High-FPS frame-to-frame optical flow tracking between periodic MTCNN re-detection cycles.
-- **5-Second Video Chunking (`shutil`)**: Automatically purges and organizes raw video chunks and cropped lip video chunks, generating ZIP archives on the fly.
-- **Structured CSV Telemetry**: Logs frame index, time offset, lip width (px), lip center coordinates (X, Y), and active optical flow points count.
-- **Interactive Streamlit Web Studio (`app.py`)**: Real-time browser app with Plotly telemetry analytics, video playback, and live video uploading.
-- **GitHub Pages Showcase (`index.html`)**: Beautiful, responsive landing page with video showcase and interactive Chart.js graphs.
+An end-to-end Computer Vision system for **Live Real-Time Webcam Tracking and Video Analysis** of **Whole Face, Left & Right Ears, Left & Right Eyes, Nose, and Lips**, featuring:
+- **Real-Time Live Webcam Support**: Direct OpenCV camera capture (index 0) with live preview window and browser streaming.
+- **Whole Face Tracking**: Primary bounding box `(x, y, w, h)` with center coordinates and exponential smoothing.
+- **Left & Right Ear Tracking**: Cranial lateral geometry calculation, bounding boxes, and real-time `ear_span` measurement (px).
+- **Dual Eye Tracking & Inter-Eye Distance**: Left Eye and Right Eye pupil centers, ROI boxes, and dynamic inter-eye distance metric.
+- **Nose Landmark Anchor**: Central landmark tip and ROI box.
+- **Lips Optical Flow**: Shi-Tomasi feature seeding inside lip ROI, Lucas-Kanade optical flow, motion trails, and parabolic curvature fit.
+- **Cyber HUD Telemetry**: Translucent on-screen coordinate badges attached directly to landmarks plus a live cyber HUD telemetry box.
+- **5-Second Video Chunking (`shutil`)**: Automatically partitions video chunks and cropped lip chunks into zip archives.
+- **Comprehensive CSV Telemetry**: Logs frame indices, timestamps, and full spatial coordinates for every tracked landmark.
+- **Interactive Streamlit Web Studio (`app.py`)**: Real-time browser app with live webcam streaming, photo snapshots, video uploader, and Plotly analytics.
+- **Showcase Landing Page (`index.html`)**: Responsive dark glassmorphic showcase with interactive Chart.js charts.
 
 ---
 
@@ -27,15 +26,18 @@ An end-to-end Computer Vision system for **Lips-Only Detection, Feature Point Se
 
 ```mermaid
 flowchart TD
-    A[Input Video / Webcam] --> B[MTCNN Face & Mouth Detection]
-    B --> C[Compute Lip ROI Bounding Box & Center]
-    C --> D[Seed Shi-Tomasi Feature Points]
-    D --> E[Lucas-Kanade Optical Flow Tracking]
-    E -->|Every N Frames| B
-    E --> F[Render Bounding Box, Points & Motion Trail]
-    F --> G[Export Main Video: tracked_lips.mp4]
-    F --> H[Segment 5s Video & Cropped Lip Chunks using shutil]
-    F --> I[Export CSV Metrics Log: lips_tracking_log.csv]
+    A[Live Webcam (Camera 0) / Video File] --> B[MTCNN Face & Landmark Detection]
+    B --> C[Compute Face BBox & Center Coordinates]
+    B --> D[Left & Right Eyes Detection + Inter-Eye Distance]
+    B --> E[Cranial Ear Geometry: Left & Right Ears + Ear Span]
+    B --> F[Nose Landmark Keypoint]
+    B --> G[Lip ROI, Corners, Shi-Tomasi Seeding & Parabola Fit]
+    G --> H[Lucas-Kanade Optical Flow Motion Propagation]
+    H -->|Every N Frames| B
+    H --> I[Cyber HUD Telemetry & Coordinate Badges Overlay]
+    I --> J[Save Full Video: recorded_face_lips_eyes_tracked.mp4]
+    I --> K[Segment 5s Chunks & Zip Archive using shutil]
+    I --> L[Export Comprehensive CSV Telemetry Log]
 ```
 
 ---
@@ -53,27 +55,70 @@ cd "Open cv models"
 pip install -r requirements.txt
 ```
 
-### 2. Run the Core Python Script
+### 2. Run Live Webcam Tracking (Camera 0)
 
-Run the main detection & tracking script with a video picker GUI or via CLI flags:
+Launch direct real-time webcam tracking from your terminal:
 
 ```bash
-# GUI file picker mode
-python track_features.py
+# Direct live webcam mode
+python track_features.py --live
 
-# CLI input mode with live preview window
-python track_features.py --input sample.mp4 --show --chunk-sec 5.0
+# Or specify webcam index 0
+python track_features.py --input 0
 ```
 
-### 3. Launch the Streamlit Web Application
+#### Interactive Window Hotkeys:
+| Key | Action |
+| --- | --- |
+| `ESC` / `q` | Stop session and finalize video/archive/CSV outputs |
+| `h` | Toggle Cyber HUD telemetry overlay on/off |
+| `b` | Toggle bounding boxes and coordinate badges on/off |
+| `r` | Force instant MTCNN landmark re-detection |
+| `s` | Save high-resolution snapshot image |
 
-Launch the interactive Streamlit Web App locally:
+### 3. Run with Recorded Video File
+
+Run detection & tracking on an existing video file:
+
+```bash
+# Process recorded video with live preview window
+python track_features.py --input tracked_lips.mp4 --show --chunk-sec 5.0
+
+# Process video in headless mode
+python track_features.py --input tracked_lips.mp4 --no-show
+```
+
+### 4. Launch the Streamlit Web Application
+
+Launch the interactive Streamlit Web Studio locally:
 
 ```bash
 streamlit run app.py
 ```
 
 Access the app in your browser at `http://localhost:8501`.
+
+Modes available in the Streamlit app:
+1. **🔴 Live Webcam Studio**: Real-time OpenCV video stream right in the browser + Camera photo snapshot analyzer.
+2. **🎥 Recorded Video Processor**: Upload any video to track all landmarks and download annotated video & CSV.
+3. **📊 Analytics & Showcase**: Plotly telemetry charts for Ear Span, Eye Distance, Lip Width, and spatial landmark trajectories.
+4. **📁 CSV Metrics Explorer**: Inspect and filter recorded CSV logs.
+
+---
+
+## 📊 CSV Telemetry Columns
+
+The exported `recorded_log.csv` contains complete spatial telemetry:
+
+| Column Group | Metrics Included |
+| --- | --- |
+| **Time & Index** | `frame`, `chunk_id`, `time_s` |
+| **Face** | `face_box_x`, `face_box_y`, `face_box_w`, `face_box_h`, `face_center_x`, `face_center_y` |
+| **Ears** | `left_ear_x`, `left_ear_y`, `left_ear_w`, `left_ear_h`, `right_ear_x`, `right_ear_y`, `right_ear_w`, `right_ear_h`, `ear_span_px` |
+| **Eyes** | `left_eye_x`, `left_eye_y`, `left_eye_w`, `left_eye_h`, `right_eye_x`, `right_eye_y`, `right_eye_w`, `right_eye_h`, `inter_eye_dist_px` |
+| **Nose** | `nose_x`, `nose_y`, `nose_w`, `nose_h` |
+| **Lips** | `left_lip_x`, `left_lip_y`, `right_lip_x`, `right_lip_y`, `lip_center_x`, `lip_center_y`, `lip_box_x`, `lip_box_y`, `lip_box_w`, `lip_box_h`, `lip_width_px`, `active_lip_points` |
+| **Parabola Fit** | `parabola_a`, `parabola_b`, `parabola_c`, `parabola_apex_x`, `parabola_apex_y` |
 
 ---
 
@@ -89,38 +134,10 @@ Access the app in your browser at `http://localhost:8501`.
    ```
 2. On GitHub, navigate to **Settings** > **Pages**.
 3. Under **Build and deployment** > **Branch**, select `main` and `/ (root)`.
-4. Click **Save**. Your live showcase will be live at:
-   `https://<username>.github.io/<repository-name>/`
+4. Click **Save**.
 
----
+### Option 2: Streamlit Community Cloud
 
-### Option 2: Streamlit Community Cloud (Free Interactive App)
-
-1. Sign in to [Streamlit Community Cloud](https://streamlit.io/cloud) with your GitHub account.
-2. Click **New app**.
-3. Select your GitHub repository (`repository-name`), branch (`main`), and set **Main file path** to `app.py`.
-4. Click **Deploy!** Your interactive Web App will be live with a shareable URL.
-
----
-
-## 📁 Repository Structure
-
-```text
-├── track_features.py        # Core MTCNN + Optical Flow tracking pipeline
-├── app.py                   # Streamlit Interactive Web Application
-├── index.html               # GitHub Pages live showcase landing page
-├── styles.css               # Modern dark glassmorphism CSS theme
-├── script.js                # Interactive Chart.js telemetry visualization
-├── tracked_lips.mp4         # Sample output annotated video
-├── lips_tracking_log.csv    # Sample frame-by-frame telemetry log
-├── features_log.csv         # Feature point tracking log
-├── requirements.txt         # Python package dependencies
-├── .gitignore               # Git ignore rules
-└── README.md                # Project documentation
-```
-
----
-
-## 📜 License
-
-This project is licensed under the [MIT License](LICENSE).
+1. Push your repository to GitHub.
+2. Sign in to [Streamlit Community Cloud](https://streamlit.io/cloud).
+3. Connect your repository and set `app.py` as the entry point.
